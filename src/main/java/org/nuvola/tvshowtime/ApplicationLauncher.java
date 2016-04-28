@@ -1,7 +1,20 @@
 package org.nuvola.tvshowtime;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import javax.annotation.PostConstruct;
+
 import org.nuvola.tvshowtime.business.plex.MediaContainer;
 import org.nuvola.tvshowtime.business.plex.Video;
+import org.nuvola.tvshowtime.business.tvshowtime.AccessToken;
 import org.nuvola.tvshowtime.business.tvshowtime.AuthorizationCode;
 import org.nuvola.tvshowtime.setting.PlexMediaServerSettings;
 import org.nuvola.tvshowtime.setting.TVShowTimeSettings;
@@ -11,14 +24,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
-
-import javax.annotation.PostConstruct;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 @SpringBootApplication
 public class ApplicationLauncher {
@@ -31,6 +42,8 @@ public class ApplicationLauncher {
 
     private RestTemplate tvShowTimeTemplate;
     private RestTemplate pmsTemplate;
+    private AccessToken accessToken;
+    private Timer tokenTimer;
 
 	public static void main(String[] args) {
 		SpringApplication.run(ApplicationLauncher.class, args);
@@ -38,22 +51,103 @@ public class ApplicationLauncher {
 
     @PostConstruct
 	public void init() {
-        if (setupTVShowTimeAPI()) {
-            processWatchedEpisodes();
+        tvShowTimeTemplate = new RestTemplate();
+
+        File storeToken = new File(tvstSettings.getTokenFile());
+        if (storeToken.exists()) {
+            try {
+                FileInputStream fileInputStream = new FileInputStream(storeToken);
+                ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+                accessToken = (AccessToken) objectInputStream.readObject();
+                objectInputStream.close();
+                fileInputStream.close();
+
+                processWatchedEpisodes();
+            } catch (Exception e) {
+                LOG.error(e.getMessage());
+            }
+        } else {
+            requestAccessToken();
         }
     }
 
-    private boolean setupTVShowTimeAPI() {
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("client_id", tvstSettings.getClientId());
+    private void requestAccessToken() {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            HttpEntity<String> entity = new HttpEntity<>("client_id=" + tvstSettings.getClientId(), headers);
 
-        tvShowTimeTemplate = new RestTemplate();
-        AuthorizationCode authorizationCode = tvShowTimeTemplate.postForObject(tvstSettings.getAuthorizeUri(),
-                parameters, AuthorizationCode.class);
+            ResponseEntity<AuthorizationCode> content = tvShowTimeTemplate.exchange(tvstSettings.getAuthorizeUri(),
+                    HttpMethod.POST, entity, AuthorizationCode.class);
+            AuthorizationCode authorizationCode = content.getBody();
 
-        System.out.println(authorizationCode);
+            if (authorizationCode.getResult().equals("OK")) {
+                LOG.info("Linking with your TVShowTime account using the code " + authorizationCode.getDevice_code());
+                LOG.info("Please open the URL " + authorizationCode.getVerification_url() + " in your browser");
+                LOG.info("Connect with your TVShowTime account and type in the following code : ");
+                LOG.info(authorizationCode.getUser_code());
 
-        return true;
+                tokenTimer = new Timer();
+                tokenTimer.scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        loadAccessToken(authorizationCode.getDevice_code());
+                    }
+                }, 1000 * authorizationCode.getInterval(), 1000 * authorizationCode.getInterval());
+            } else {
+                LOG.error("OAuth authentication TVShowTime failed.");
+            }
+        } catch (Exception e) {
+            LOG.error("OAuth authentication TVShowTime failed.");
+            LOG.error(e.getMessage());
+        }
+    }
+
+    private void loadAccessToken(String deviceCode) {
+        String query = new StringBuilder("client_id=")
+                .append(tvstSettings.getClientId())
+                .append("&client_secret=")
+                .append(tvstSettings.getClientSecret())
+                .append("&code=")
+                .append(deviceCode)
+                .toString();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpEntity<String> entity = new HttpEntity<>(query, headers);
+
+        ResponseEntity<AccessToken> content = tvShowTimeTemplate.exchange(tvstSettings.getAccessTokenUri(),
+                HttpMethod.POST, entity, AccessToken.class);
+        accessToken = content.getBody();
+
+        if (accessToken.getResult().equals("OK")) {
+            tokenTimer.cancel();
+
+            storeAccessToken();
+            processWatchedEpisodes();
+        } else {
+            if (accessToken.getMessage().equals("Authorization pending")
+                    || accessToken.getMessage().equals("Slow down")) {
+                LOG.info("Still waiting for the user to type in the code in TVShowTime ...");
+            } else {
+                LOG.error("Unexpected error did arrive, please reload the service :-(");
+                tokenTimer.cancel();
+            }
+        }
+    }
+
+    private void storeAccessToken() {
+        try {
+            File storeToken = new File(tvstSettings.getTokenFile());
+            FileOutputStream fileOutputStream = new FileOutputStream(storeToken);
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+            objectOutputStream.writeObject(accessToken);
+            objectOutputStream.close();
+            fileOutputStream.close();
+        } catch (Exception e) {
+            LOG.error("Unexpected error did arrive when trying to store the AccessToken in a file ");
+            LOG.error(e.getMessage());
+        }
     }
 
     private void processWatchedEpisodes() {
@@ -67,7 +161,8 @@ public class ApplicationLauncher {
 
             // Mark as watched only today episodes
             if(date.toLocalDate().equals(LocalDate.now().minusDays(1)) && video.getType().equals("episode")) {
-                // TODO : Call TVSHow Time API to mark as Watched ...
+                // TODO: Call TVSHow Time API to mark as Watched ...
+
                 String episode = new StringBuilder(video.getGrandparentTitle())
                         .append(" - S")
                         .append(video.getParentIndex())

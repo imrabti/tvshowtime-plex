@@ -11,6 +11,7 @@ public class TVShowTimeSettings {
     private String clientId;
     private String clientSecret;
     private String userAgent;
+    private String tokenFile;
 
     public String getAuthorizeUri() {
         return authorizeUri;
@@ -50,5 +51,13 @@ public class TVShowTimeSettings {
 
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
+    }
+
+    public String getTokenFile() {
+        return tokenFile;
+    }
+
+    public void setTokenFile(String tokenFile) {
+        this.tokenFile = tokenFile;
     }
 }

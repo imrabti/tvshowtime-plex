@@ -1,7 +1,10 @@
 package org.nuvola.tvshowtime.business.tvshowtime;
 
-public class Message {
+import java.io.Serializable;
+
+public class Message implements Serializable {
     private String result;
+    private String message;
 
     public String getResult() {
         return result;
@@ -9,5 +12,13 @@ public class Message {
 
     public void setResult(String result) {
         this.result = result;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

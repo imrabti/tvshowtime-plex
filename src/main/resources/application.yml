@@ -8,3 +8,4 @@ nuvola:
     clientId: va0D2CEfSPNNlLoYMYYT
     clientSecret: RF51gSEZBJAbLXmEUCZ8thJAwJPAyQSafCQCyqOt
     userAgent: plex-tvst-scrobbler
+    tokenFile: session_token
