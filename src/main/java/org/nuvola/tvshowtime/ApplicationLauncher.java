@@ -16,6 +16,7 @@ import org.nuvola.tvshowtime.business.plex.MediaContainer;
 import org.nuvola.tvshowtime.business.plex.Video;
 import org.nuvola.tvshowtime.business.tvshowtime.AccessToken;
 import org.nuvola.tvshowtime.business.tvshowtime.AuthorizationCode;
+import org.nuvola.tvshowtime.business.tvshowtime.Message;
 import org.nuvola.tvshowtime.setting.PlexMediaServerSettings;
 import org.nuvola.tvshowtime.setting.TVShowTimeSettings;
 import org.nuvola.tvshowtime.util.DateUtils;
@@ -167,16 +168,31 @@ public class ApplicationLauncher {
 
             // Mark as watched only today episodes
             if(date.toLocalDate().equals(LocalDate.now().minusDays(1)) && video.getType().equals("episode")) {
-                // TODO: Call TVSHow Time API to mark as Watched ...
-
                 String episode = new StringBuilder(video.getGrandparentTitle())
                         .append(" - S")
                         .append(video.getParentIndex())
                         .append("E").append(video.getIndex())
                         .toString();
 
-                LOG.info("Mark " + episode + " as watched");
+                markEpisodeAsWatched(episode);
             }
+        }
+    }
+
+    private void markEpisodeAsWatched(String episode) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.add("Authorization: token", accessToken.getAccess_token());
+        HttpEntity<String> entity = new HttpEntity<>(episode, headers);
+
+        ResponseEntity<Message> content = tvShowTimeTemplate.exchange(tvstSettings.getCheckinUri(),
+                HttpMethod.POST, entity, Message.class);
+        Message message = content.getBody();
+
+        if (message.getResult().equals("OK")) {
+            LOG.info("Mark " + episode + " as watched in TVShowTime");
+        } else {
+            LOG.error("Error while marking [" + episode + "] as watched in TVShowTime ");
         }
     }
 }
