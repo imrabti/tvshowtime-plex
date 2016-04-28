@@ -2,3 +2,10 @@ nuvola:
   pms:
     path: http://192.168.1.5:32400
     watchHistory: /status/sessions/history/all
+  tvshowtime:
+    authorizeUri: https://api.tvshowtime.com/v1/oauth/device/code
+    accessTokenUri: https://api.tvshowtime.com/v1/oauth/access_token
+    clientId: va0D2CEfSPNNlLoYMYYT
+    clientSecret: RF51gSEZBJAbLXmEUCZ8thJAwJPAyQSafCQCyqOt
+    userAgent: plex-tvst-scrobbler
+    tokenFile: session_token
