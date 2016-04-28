@@ -168,7 +168,7 @@ public class ApplicationLauncher {
             LocalDateTime date = DateUtils.getDateTimeFromTimestamp(video.getViewedAt());
 
             // Mark as watched only today episodes
-            if(date.toLocalDate().equals(LocalDate.now().minusDays(1)) && video.getType().equals("episode")) {
+            if(date.toLocalDate().equals(LocalDate.now()) && video.getType().equals("episode")) {
                 String episode = new StringBuilder(video.getGrandparentTitle())
                         .append(" - S")
                         .append(video.getParentIndex())
