@@ -1,4 +1,4 @@
-package org.nuvola.tvshowtime.business;
+package org.nuvola.tvshowtime.business.plex;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -9,6 +9,7 @@ public class Video {
     private Integer parentIndex;
     private Integer index;
     private Long viewedAt;
+    private String type;
 
     @XmlAttribute(name="grandparentTitle")
     public String getGrandparentTitle() {
@@ -44,5 +45,14 @@ public class Video {
 
     public void setViewedAt(Long viewedAt) {
         this.viewedAt = viewedAt;
+    }
+
+    @XmlAttribute(name="type")
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }
