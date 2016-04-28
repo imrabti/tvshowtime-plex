@@ -46,4 +46,15 @@ public class AuthorizationCode extends Message {
     public void setInterval(Integer interval) {
         this.interval = interval;
     }
+
+    @Override
+    public String toString() {
+        return "AuthorizationCode{" +
+                "device_code='" + device_code + '\'' +
+                ", user_code='" + user_code + '\'' +
+                ", verification_url='" + verification_url + '\'' +
+                ", expires_in=" + expires_in +
+                ", interval=" + interval +
+                '}';
+    }
 }

@@ -2,6 +2,7 @@ package org.nuvola.tvshowtime;
 
 import org.nuvola.tvshowtime.business.plex.MediaContainer;
 import org.nuvola.tvshowtime.business.plex.Video;
+import org.nuvola.tvshowtime.business.tvshowtime.AuthorizationCode;
 import org.nuvola.tvshowtime.setting.PlexMediaServerSettings;
 import org.nuvola.tvshowtime.setting.TVShowTimeSettings;
 import org.nuvola.tvshowtime.util.DateUtils;
@@ -16,6 +17,8 @@ import org.springframework.web.client.RestTemplate;
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @SpringBootApplication
 public class ApplicationLauncher {
@@ -41,7 +44,14 @@ public class ApplicationLauncher {
     }
 
     private boolean setupTVShowTimeAPI() {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("client_id", tvstSettings.getClientId());
+
         tvShowTimeTemplate = new RestTemplate();
+        AuthorizationCode authorizationCode = tvShowTimeTemplate.postForObject(tvstSettings.getAuthorizeUri(),
+                parameters, AuthorizationCode.class);
+
+        System.out.println(authorizationCode);
 
         return true;
     }
