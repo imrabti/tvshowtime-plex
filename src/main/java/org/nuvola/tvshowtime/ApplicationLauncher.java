@@ -62,8 +62,11 @@ public class ApplicationLauncher {
                 objectInputStream.close();
                 fileInputStream.close();
 
+                LOG.info("AccessToken loaded from file with success : " + accessToken);
                 processWatchedEpisodes();
             } catch (Exception e) {
+                LOG.error("Error parsing the AccessToken stored in 'session_token'.");
+                LOG.error("Please remove the 'session_token' file, and try again.");
                 LOG.error(e.getMessage());
             }
         } else {
@@ -121,6 +124,7 @@ public class ApplicationLauncher {
         accessToken = content.getBody();
 
         if (accessToken.getResult().equals("OK")) {
+            LOG.info("AccessToken from TVShowTime with success : " + accessToken);
             tokenTimer.cancel();
 
             storeAccessToken();
@@ -144,6 +148,8 @@ public class ApplicationLauncher {
             objectOutputStream.writeObject(accessToken);
             objectOutputStream.close();
             fileOutputStream.close();
+
+            LOG.info("AccessToken store successfully inside a file...");
         } catch (Exception e) {
             LOG.error("Unexpected error did arrive when trying to store the AccessToken in a file ");
             LOG.error(e.getMessage());

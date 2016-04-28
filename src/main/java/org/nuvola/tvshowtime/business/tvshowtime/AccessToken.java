@@ -10,4 +10,11 @@ public class AccessToken extends Message {
     public void setAccess_token(String access_token) {
         this.access_token = access_token;
     }
+
+    @Override
+    public String toString() {
+        return "AccessToken{" +
+                "access_token='" + access_token + '\'' +
+                '}';
+    }
 }
