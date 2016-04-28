@@ -2,10 +2,12 @@ package org.nuvola.tvshowtime;
 
 import org.nuvola.tvshowtime.business.plex.MediaContainer;
 import org.nuvola.tvshowtime.business.plex.Video;
+import org.nuvola.tvshowtime.setting.PlexMediaServerSettings;
+import org.nuvola.tvshowtime.setting.TVShowTimeSettings;
 import org.nuvola.tvshowtime.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +21,10 @@ import java.time.LocalDateTime;
 public class ApplicationLauncher {
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationLauncher.class);
 
-    @Value("${nuvola.pms.path}")
-    private String pmsPath;
-    @Value("${nuvola.pms.watchHistory}")
-    private String watchHistory;
+    @Autowired
+    private PlexMediaServerSettings pmsSettings;
+    @Autowired
+    private TVShowTimeSettings tvstSettings;
 
     private RestTemplate tvShowTimeTemplate;
     private RestTemplate pmsTemplate;
@@ -46,7 +48,8 @@ public class ApplicationLauncher {
 
     private void processWatchedEpisodes() {
         pmsTemplate = new RestTemplate();
-        ResponseEntity<MediaContainer> response =  pmsTemplate.getForEntity(pmsPath + watchHistory, MediaContainer.class);
+        ResponseEntity<MediaContainer> response =  pmsTemplate.getForEntity(pmsSettings.getWatchHistoryUrl(),
+                MediaContainer.class);
         MediaContainer mediaContainer = response.getBody();
 
         for (Video video : mediaContainer.getVideo()) {
