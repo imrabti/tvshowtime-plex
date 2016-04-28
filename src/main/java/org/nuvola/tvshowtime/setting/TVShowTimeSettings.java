@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 public class TVShowTimeSettings {
     private String authorizeUri;
     private String accessTokenUri;
+    private String checkinUri;
     private String clientId;
     private String clientSecret;
     private String userAgent;
@@ -27,6 +28,14 @@ public class TVShowTimeSettings {
 
     public void setAccessTokenUri(String accessTokenUri) {
         this.accessTokenUri = accessTokenUri;
+    }
+
+    public String getCheckinUri() {
+        return checkinUri;
+    }
+
+    public void setCheckinUri(String checkinUri) {
+        this.checkinUri = checkinUri;
     }
 
     public String getClientId() {

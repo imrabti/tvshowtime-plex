@@ -7,6 +7,7 @@ nuvola:
   tvshowtime:
     authorizeUri: https://api.tvshowtime.com/v1/oauth/device/code
     accessTokenUri: https://api.tvshowtime.com/v1/oauth/access_token
+    checkinUri: https://api.tvshowtime.com/v1/checkin
     clientId: va0D2CEfSPNNlLoYMYYT
     clientSecret: RF51gSEZBJAbLXmEUCZ8thJAwJPAyQSafCQCyqOt
     userAgent: plex-tvst-scrobbler
