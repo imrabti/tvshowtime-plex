@@ -27,10 +27,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+
+import static org.springframework.http.HttpMethod.POST;
 
 @SpringBootApplication
 public class ApplicationLauncher {
@@ -82,7 +83,7 @@ public class ApplicationLauncher {
             HttpEntity<String> entity = new HttpEntity<>("client_id=" + tvstSettings.getClientId(), headers);
 
             ResponseEntity<AuthorizationCode> content = tvShowTimeTemplate.exchange(tvstSettings.getAuthorizeUri(),
-                    HttpMethod.POST, entity, AuthorizationCode.class);
+                    POST, entity, AuthorizationCode.class);
             AuthorizationCode authorizationCode = content.getBody();
 
             if (authorizationCode.getResult().equals("OK")) {
@@ -121,7 +122,7 @@ public class ApplicationLauncher {
         HttpEntity<String> entity = new HttpEntity<>(query, headers);
 
         ResponseEntity<AccessToken> content = tvShowTimeTemplate.exchange(tvstSettings.getAccessTokenUri(),
-                HttpMethod.POST, entity, AccessToken.class);
+                POST, entity, AccessToken.class);
         accessToken = content.getBody();
 
         if (accessToken.getResult().equals("OK")) {
@@ -182,11 +183,15 @@ public class ApplicationLauncher {
     private void markEpisodeAsWatched(String episode) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.add("Authorization: token", accessToken.getAccess_token());
-        HttpEntity<String> entity = new HttpEntity<>(episode, headers);
+        headers.add("User-Agent", tvstSettings.getUserAgent());
+        HttpEntity<String> entity = new HttpEntity<>("filename=" + episode, headers);
 
-        ResponseEntity<Message> content = tvShowTimeTemplate.exchange(tvstSettings.getCheckinUri(),
-                HttpMethod.POST, entity, Message.class);
+        String checkinUrl = new StringBuilder(tvstSettings.getCheckinUri())
+                .append("?access_token=")
+                .append(accessToken.getAccess_token())
+                .toString();
+
+        ResponseEntity<Message> content = tvShowTimeTemplate.exchange(checkinUrl, POST, entity, Message.class);
         Message message = content.getBody();
 
         if (message.getResult().equals("OK")) {
