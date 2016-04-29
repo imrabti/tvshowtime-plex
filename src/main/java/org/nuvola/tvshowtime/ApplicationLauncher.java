@@ -17,12 +17,10 @@ import org.nuvola.tvshowtime.business.plex.Video;
 import org.nuvola.tvshowtime.business.tvshowtime.AccessToken;
 import org.nuvola.tvshowtime.business.tvshowtime.AuthorizationCode;
 import org.nuvola.tvshowtime.business.tvshowtime.Message;
-import org.nuvola.tvshowtime.setting.PlexMediaServerSettings;
-import org.nuvola.tvshowtime.setting.TVShowTimeSettings;
 import org.nuvola.tvshowtime.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpEntity;
@@ -31,16 +29,23 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import static org.nuvola.tvshowtime.util.Constants.PMS_WATCH_HISTORY;
+import static org.nuvola.tvshowtime.util.Constants.TVST_ACCESS_TOKEN_URI;
+import static org.nuvola.tvshowtime.util.Constants.TVST_AUTHORIZE_URI;
+import static org.nuvola.tvshowtime.util.Constants.TVST_CHECKIN_URI;
+import static org.nuvola.tvshowtime.util.Constants.TVST_CLIENT_ID;
+import static org.nuvola.tvshowtime.util.Constants.TVST_CLIENT_SECRET;
+import static org.nuvola.tvshowtime.util.Constants.TVST_USER_AGENT;
 import static org.springframework.http.HttpMethod.POST;
 
 @SpringBootApplication
 public class ApplicationLauncher {
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationLauncher.class);
 
-    @Autowired
-    private PlexMediaServerSettings pmsSettings;
-    @Autowired
-    private TVShowTimeSettings tvstSettings;
+    @Value("${nuvola.tvshowtime.tokenFile}")
+    private String tokenFile;
+    @Value("${nuvola.pms.path}")
+    private String pmsHost;
 
     private RestTemplate tvShowTimeTemplate;
     private RestTemplate pmsTemplate;
@@ -55,7 +60,7 @@ public class ApplicationLauncher {
 	public void init() {
         tvShowTimeTemplate = new RestTemplate();
 
-        File storeToken = new File(tvstSettings.getTokenFile());
+        File storeToken = new File(tokenFile);
         if (storeToken.exists()) {
             try {
                 FileInputStream fileInputStream = new FileInputStream(storeToken);
@@ -80,10 +85,10 @@ public class ApplicationLauncher {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-            HttpEntity<String> entity = new HttpEntity<>("client_id=" + tvstSettings.getClientId(), headers);
+            HttpEntity<String> entity = new HttpEntity<>("client_id=" + TVST_CLIENT_ID, headers);
 
-            ResponseEntity<AuthorizationCode> content = tvShowTimeTemplate.exchange(tvstSettings.getAuthorizeUri(),
-                    POST, entity, AuthorizationCode.class);
+            ResponseEntity<AuthorizationCode> content = tvShowTimeTemplate.exchange(TVST_AUTHORIZE_URI, POST, entity,
+                    AuthorizationCode.class);
             AuthorizationCode authorizationCode = content.getBody();
 
             if (authorizationCode.getResult().equals("OK")) {
@@ -110,9 +115,9 @@ public class ApplicationLauncher {
 
     private void loadAccessToken(String deviceCode) {
         String query = new StringBuilder("client_id=")
-                .append(tvstSettings.getClientId())
+                .append(TVST_CLIENT_ID)
                 .append("&client_secret=")
-                .append(tvstSettings.getClientSecret())
+                .append(TVST_CLIENT_SECRET)
                 .append("&code=")
                 .append(deviceCode)
                 .toString();
@@ -121,8 +126,8 @@ public class ApplicationLauncher {
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         HttpEntity<String> entity = new HttpEntity<>(query, headers);
 
-        ResponseEntity<AccessToken> content = tvShowTimeTemplate.exchange(tvstSettings.getAccessTokenUri(),
-                POST, entity, AccessToken.class);
+        ResponseEntity<AccessToken> content = tvShowTimeTemplate.exchange(TVST_ACCESS_TOKEN_URI, POST, entity,
+                AccessToken.class);
         accessToken = content.getBody();
 
         if (accessToken.getResult().equals("OK")) {
@@ -144,7 +149,7 @@ public class ApplicationLauncher {
 
     private void storeAccessToken() {
         try {
-            File storeToken = new File(tvstSettings.getTokenFile());
+            File storeToken = new File(tokenFile);
             FileOutputStream fileOutputStream = new FileOutputStream(storeToken);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
             objectOutputStream.writeObject(accessToken);
@@ -160,7 +165,7 @@ public class ApplicationLauncher {
 
     private void processWatchedEpisodes() {
         pmsTemplate = new RestTemplate();
-        ResponseEntity<MediaContainer> response =  pmsTemplate.getForEntity(pmsSettings.getWatchHistoryUrl(),
+        ResponseEntity<MediaContainer> response =  pmsTemplate.getForEntity(pmsHost + PMS_WATCH_HISTORY,
                 MediaContainer.class);
         MediaContainer mediaContainer = response.getBody();
 
@@ -184,10 +189,10 @@ public class ApplicationLauncher {
     private void markEpisodeAsWatched(String episode) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.add("User-Agent", tvstSettings.getUserAgent());
+        headers.add("User-Agent", TVST_USER_AGENT);
         HttpEntity<String> entity = new HttpEntity<>("filename=" + episode, headers);
 
-        String checkinUrl = new StringBuilder(tvstSettings.getCheckinUri())
+        String checkinUrl = new StringBuilder(TVST_CHECKIN_URI)
                 .append("?access_token=")
                 .append(accessToken.getAccess_token())
                 .toString();
