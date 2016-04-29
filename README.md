@@ -12,3 +12,16 @@ Some details :
   this application.
   - It uses a REST API offered by PMS to check the watched episodes and mark them as watched in TVShowTime, no need to add
   a special log configuration to your PMS.
+
+Installation
+===============
+
+**Linux, OSX, Windows**
+
+First make sure that you have aready installed Java 8 JRE in your computer, and that it is configured on the PATH.
+You can download Java 8 right from Oracle website, or if you are using Linux you can also choose to install and use the OpenJRE from the packages.
+
+After this you are done with the requirements to run **tvshowtime-plex**, the next step is to download the already compiled package **tvshowtime-plex** from :
+
+Configuration
+-------------
