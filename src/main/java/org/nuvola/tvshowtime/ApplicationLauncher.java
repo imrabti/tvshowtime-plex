@@ -1,16 +1,22 @@
+/*
+ * tvshowtimeplex
+ * Copyright (C) 2016  Nuvola - Mrabti Idriss
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.nuvola.tvshowtime;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import javax.annotation.PostConstruct;
 
 import org.nuvola.tvshowtime.business.plex.MediaContainer;
 import org.nuvola.tvshowtime.business.plex.Video;
@@ -27,7 +33,19 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static org.nuvola.tvshowtime.util.Constants.PMS_WATCH_HISTORY;
 import static org.nuvola.tvshowtime.util.Constants.TVST_ACCESS_TOKEN_URI;
@@ -39,6 +57,7 @@ import static org.nuvola.tvshowtime.util.Constants.TVST_USER_AGENT;
 import static org.springframework.http.HttpMethod.POST;
 
 @SpringBootApplication
+@EnableScheduling
 public class ApplicationLauncher {
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationLauncher.class);
 
@@ -56,7 +75,7 @@ public class ApplicationLauncher {
 		SpringApplication.run(ApplicationLauncher.class, args);
 	}
 
-    @PostConstruct
+    @Scheduled(fixedDelay = Long.MAX_VALUE)
 	public void init() {
         tvShowTimeTemplate = new RestTemplate();
 
@@ -96,6 +115,7 @@ public class ApplicationLauncher {
                 LOG.info("Please open the URL " + authorizationCode.getVerification_url() + " in your browser");
                 LOG.info("Connect with your TVShowTime account and type in the following code : ");
                 LOG.info(authorizationCode.getUser_code());
+                LOG.info("Waiting for the you to type in the code in TVShowTime :-D ...");
 
                 tokenTimer = new Timer();
                 tokenTimer.scheduleAtFixedRate(new TimerTask() {
@@ -137,10 +157,8 @@ public class ApplicationLauncher {
             storeAccessToken();
             processWatchedEpisodes();
         } else {
-            if (accessToken.getMessage().equals("Authorization pending")
-                    || accessToken.getMessage().equals("Slow down")) {
-                LOG.info("Still waiting for the user to type in the code in TVShowTime ...");
-            } else {
+            if (!accessToken.getMessage().equals("Authorization pending")
+                    && !accessToken.getMessage().equals("Slow down")) {
                 LOG.error("Unexpected error did arrive, please reload the service :-(");
                 tokenTimer.cancel();
             }
