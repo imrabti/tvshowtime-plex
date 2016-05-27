@@ -21,7 +21,7 @@ Installation
 First make sure that you have already installed Java 8 JRE in your computer, and that it is configured on the PATH.
 You can download Java 8 right from Oracle website, or if you are using Linux you can also choose to install and use the OpenJRE from the packages.
 
-After this you are done with the requirements to run **tvshowtime-plex**, the next step is to download the already compiled package **tvshowtime-plex** from : [tvshowtime-plex 1.0.0](https://github.com/imrabti/tvshowtime-plex/releases/download/V1.0.0/tvshowtime-plex-1.0.0.zip)
+After this you are done with the requirements to run **tvshowtime-plex**, the next step is to download the already compiled package **tvshowtime-plex** from : [tvshowtime-plex 1.0.0](https://github.com/imrabti/tvshowtime-plex/releases/download/1.0.1/tvshowtime-plex-1.0.1.zip)
 
 Configuration
 -------------
