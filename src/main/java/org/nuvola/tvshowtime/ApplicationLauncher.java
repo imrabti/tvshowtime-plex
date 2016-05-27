@@ -200,6 +200,8 @@ public class ApplicationLauncher {
                         .toString();
 
                 markEpisodeAsWatched(episode);
+            } else {
+                System.exit(0);
             }
         }
     }
