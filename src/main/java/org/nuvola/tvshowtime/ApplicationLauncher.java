@@ -18,6 +18,16 @@
 
 package org.nuvola.tvshowtime;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import org.nuvola.tvshowtime.business.plex.MediaContainer;
 import org.nuvola.tvshowtime.business.plex.Video;
 import org.nuvola.tvshowtime.business.tvshowtime.AccessToken;
@@ -37,16 +47,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import static org.nuvola.tvshowtime.util.Constants.PMS_WATCH_HISTORY;
 import static org.nuvola.tvshowtime.util.Constants.TVST_ACCESS_TOKEN_URI;
 import static org.nuvola.tvshowtime.util.Constants.TVST_AUTHORIZE_URI;
@@ -65,6 +65,8 @@ public class ApplicationLauncher {
     private String tokenFile;
     @Value("${nuvola.pms.path}")
     private String pmsHost;
+    @Value("${nuvola.pms.token}")
+    private String pmsToken;
 
     private RestTemplate tvShowTimeTemplate;
     private RestTemplate pmsTemplate;
@@ -115,7 +117,7 @@ public class ApplicationLauncher {
                 LOG.info("Please open the URL " + authorizationCode.getVerification_url() + " in your browser");
                 LOG.info("Connect with your TVShowTime account and type in the following code : ");
                 LOG.info(authorizationCode.getUser_code());
-                LOG.info("Waiting for the you to type in the code in TVShowTime :-D ...");
+                LOG.info("Waiting for you to type in the code in TVShowTime :-D ...");
 
                 tokenTimer = new Timer();
                 tokenTimer.scheduleAtFixedRate(new TimerTask() {
@@ -183,8 +185,14 @@ public class ApplicationLauncher {
 
     private void processWatchedEpisodes() {
         pmsTemplate = new RestTemplate();
-        ResponseEntity<MediaContainer> response =  pmsTemplate.getForEntity(pmsHost + PMS_WATCH_HISTORY,
-                MediaContainer.class);
+        String watchHistoryUrl = pmsHost + PMS_WATCH_HISTORY;
+
+        if (pmsToken != null && !pmsToken.isEmpty()) {
+            watchHistoryUrl += "?X-Plex-Token=" + pmsToken;
+            LOG.info("Calling Plex with a X-Plex-Token...");
+        }
+
+        ResponseEntity<MediaContainer> response =  pmsTemplate.getForEntity(watchHistoryUrl, MediaContainer.class);
         MediaContainer mediaContainer = response.getBody();
 
         for (Video video : mediaContainer.getVideo()) {
