@@ -47,12 +47,14 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.client.RestTemplate;
 
+import static org.nuvola.tvshowtime.util.Constants.MINUTE_IN_MILIS;
 import static org.nuvola.tvshowtime.util.Constants.PMS_WATCH_HISTORY;
 import static org.nuvola.tvshowtime.util.Constants.TVST_ACCESS_TOKEN_URI;
 import static org.nuvola.tvshowtime.util.Constants.TVST_AUTHORIZE_URI;
 import static org.nuvola.tvshowtime.util.Constants.TVST_CHECKIN_URI;
 import static org.nuvola.tvshowtime.util.Constants.TVST_CLIENT_ID;
 import static org.nuvola.tvshowtime.util.Constants.TVST_CLIENT_SECRET;
+import static org.nuvola.tvshowtime.util.Constants.TVST_RATE_REMAINING_HEADER;
 import static org.nuvola.tvshowtime.util.Constants.TVST_USER_AGENT;
 import static org.springframework.http.HttpMethod.POST;
 
@@ -91,11 +93,23 @@ public class ApplicationLauncher {
                 fileInputStream.close();
 
                 LOG.info("AccessToken loaded from file with success : " + accessToken);
-                processWatchedEpisodes();
             } catch (Exception e) {
                 LOG.error("Error parsing the AccessToken stored in 'session_token'.");
                 LOG.error("Please remove the 'session_token' file, and try again.");
                 LOG.error(e.getMessage());
+
+                System.exit(1);
+            }
+
+            try {
+                processWatchedEpisodes();
+
+                LOG.info("All episodes are processed successfully." + accessToken);
+            } catch (Exception e) {
+                LOG.error("Error during marking episodes as watched.");
+                LOG.error(e.getMessage());
+
+                System.exit(1);
             }
         } else {
             requestAccessToken();
@@ -128,10 +142,14 @@ public class ApplicationLauncher {
                 }, 1000 * authorizationCode.getInterval(), 1000 * authorizationCode.getInterval());
             } else {
                 LOG.error("OAuth authentication TVShowTime failed.");
+
+                System.exit(1);
             }
         } catch (Exception e) {
             LOG.error("OAuth authentication TVShowTime failed.");
             LOG.error(e.getMessage());
+
+            System.exit(1);
         }
     }
 
@@ -163,6 +181,8 @@ public class ApplicationLauncher {
                     && !accessToken.getMessage().equals("Slow down")) {
                 LOG.error("Unexpected error did arrive, please reload the service :-(");
                 tokenTimer.cancel();
+
+                System.exit(1);
             }
         }
     }
@@ -180,6 +200,8 @@ public class ApplicationLauncher {
         } catch (Exception e) {
             LOG.error("Unexpected error did arrive when trying to store the AccessToken in a file ");
             LOG.error(e.getMessage());
+
+            System.exit(1);
         }
     }
 
@@ -232,6 +254,19 @@ public class ApplicationLauncher {
             LOG.info("Mark " + episode + " as watched in TVShowTime");
         } else {
             LOG.error("Error while marking [" + episode + "] as watched in TVShowTime ");
+        }
+
+        // Check if we are below the Rate-Limit of the API
+        int remainingApiCalls = Integer.parseInt(content.getHeaders().get(TVST_RATE_REMAINING_HEADER).get(0));
+        if (remainingApiCalls == 0) {
+            try {
+                LOG.info("Consumed all available TVShowTime API calls slots, waiting for new slots ...");
+                Thread.sleep(MINUTE_IN_MILIS);
+            } catch (Exception e) {
+                LOG.error(e.getMessage());
+
+                System.exit(1);
+            }
         }
     }
 }
