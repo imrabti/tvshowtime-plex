@@ -21,7 +21,7 @@ Installation
 First make sure that you have already installed Java 8 JRE in your computer, and that it is configured on the PATH.
 You can download Java 8 right from Oracle website, or if you are using Linux you can also choose to install and use the OpenJRE from the packages.
 
-After this you are done with the requirements to run **tvshowtime-plex**, the next step is to download the already compiled package **tvshowtime-plex** from : [tvshowtime-plex 1.0.1](https://github.com/imrabti/tvshowtime-plex/releases/download/1.0.1/tvshowtime-plex-1.0.1.zip)
+After this you are done with the requirements to run **tvshowtime-plex**, the next step is to download the already compiled package **tvshowtime-plex** from : [tvshowtime-plex 1.0.2](https://github.com/imrabti/tvshowtime-plex/releases/download/1.0.2/tvshowtime-plex-1.0.2.zip)
 
 Configuration
 -------------
@@ -31,13 +31,20 @@ After downloading the application and extracting the archive in the folder you w
 There are two importants properties that needs to be configured correctly are : 
 
 1. **nuvola.pms.path** this is the HTTP URL of your Plex Media Server, if you are going to run this application on the same server as PMS then the default provided value is good (no need to change it), if it is not the case then you need to put the correct URL for _example nuvola.pms.path = http://192.168.1.5:32400_
-2. **nuvola.tvshowtime.tokenFile** this is the complete file path where you want your OAuth authorisation token to be stored, if you want the token to be stored in the folder where the application is then you are good with the default value. It is used so that you dont always have to go through all frustrating steps of configuring you TVShowTime account with this application.
+2. **nuvola.pms.token** this is required only if you have multiple users in your Plex Media Server, because in this case all web services calls are secured and need to be done with the **X-Plex-Token**, to find out the Plex Token for the user you want to configure with **tvshowtime-plex** this article will explain to you how : http://bit.ly/1PqlB1v
+3. **nuvola.tvshowtime.tokenFile** this is the complete file path where you want your OAuth authorisation token to be stored, if you want the token to be stored in the folder where the application is then you are good with the default value. It is used so that you dont always have to go through all frustrating steps of configuring you TVShowTime account with this application.
 
 ```
 # REQUIRED: nuvola.pms.path is the location of the http service exposed by Plex Media Server
 # the default value should be 'ok', assuming you're running the tvshowtime-plex on the same machine
 # where the PMS is installed
 nuvola.pms.path = http://localhost:32400
+
+# OPTIONAL when there is only one single Plex user
+# REQUIRED when there is multiple Plex users. When you have multiple users in Plex, PMS secure all
+# web services. In this case 'X-Plex-Token' of the user you want to use is important to communicate with PMS
+# To find the 'X-Plex-Token' follow this article : http://bit.ly/1PqlB1v
+nuvola.pms.token =
 
 # REQUIRED: Where do you wish to write the token used for authorizing access to
 # you TVShow Time account, the default value should be 'ok'
