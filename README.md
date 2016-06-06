@@ -63,3 +63,32 @@ After configuring the **application.properties** file you can now launch the ser
 java -jar tvshowtimeplex.jar
 ```
 
+The next step is authorize **tvshowtime-plex** to communicate with your TVShowTime account. When you launch the application for the first time you see the following logs, you should the follow the instruction given.
+
+```
+Connected to the target VM, address: '127.0.0.1:43236', transport: 'socket'
+ _____     _____ _                 _____ _                      ______ _
+|_   _|   /  ___| |               |_   _(_)                     | ___ \ |
+  | |_   _\ `--.| |__   _____      _| |  _ _ __ ___   ___ ______| |_/ / | _____  __
+  | \ \ / /`--. \ '_ \ / _ \ \ /\ / / | | | '_ ` _ \ / _ \______|  __/| |/ _ \ \/ /
+  | |\ V //\__/ / | | | (_) \ V  V /| | | | | | | | |  __/      | |   | |  __/>  <
+  \_/ \_/ \____/|_| |_|\___/ \_/\_/ \_/ |_|_| |_| |_|\___|      \_|   |_|\___/_/\_\
+
+   :::  TVShowTime-Plex (V1.0.3)  :::
+
+11:39 INFO  - Starting ApplicationLauncher
+11:39 INFO  - No active profile set, falling back to default profiles: default
+11:39 INFO  - Started ApplicationLauncher in 2.493 seconds (JVM running for 3.444)
+11:39 INFO  - Linking with your TVShowTime account using the code 6quuR06OIYIwK-3vmRnE
+11:39 INFO  - Please open the URL https://www.tvshowtime.com/activate in your browser
+11:39 INFO  - Connect with your TVShowTime account and type in the following code : 
+11:39 INFO  - 775b-a461
+11:39 INFO  - Waiting for you to type in the code in TVShowTime :-D ...
+```
+
+In order to allow **tvshowtime-plex** mark episodes as watched in your account, as displayed in the logs you need to follow the the steps below :
+
+1. You need to visit this URL [TVShowTime activate](https://www.tvshowtime.com/activate)
+
+2. If you didnt login to your TVShowTime, it will ask you to login and, it will give an interface where you need to type the code that was giving to you in the log, which is in our case **775b-a461**
+
