@@ -102,8 +102,6 @@ public class ApplicationLauncher {
 
             try {
                 processWatchedEpisodes();
-
-                LOG.info("All episodes are processed successfully ...");
             } catch (Exception e) {
                 LOG.error("Error during marking episodes as watched.");
                 LOG.error(e.getMessage());
@@ -233,7 +231,8 @@ public class ApplicationLauncher {
                     continue;
                 }
             } else {
-                break;
+                LOG.info("All episodes are processed successfully ...");
+                System.exit(0);
             }
         }
     }
