@@ -23,7 +23,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -104,7 +103,7 @@ public class ApplicationLauncher {
             try {
                 processWatchedEpisodes();
 
-                LOG.info("All episodes are processed successfully." + accessToken);
+                LOG.info("All episodes are processed successfully ...");
             } catch (Exception e) {
                 LOG.error("Error during marking episodes as watched.");
                 LOG.error(e.getMessage());
@@ -221,17 +220,20 @@ public class ApplicationLauncher {
             LocalDateTime date = DateUtils.getDateTimeFromTimestamp(video.getViewedAt());
 
             // Mark as watched only today and yesterday episodes
-            if((date.toLocalDate().equals(LocalDate.now()) || date.toLocalDate().equals(LocalDate.now().minusDays(1)))
-                    && video.getType().equals("episode")) {
-                String episode = new StringBuilder(video.getGrandparentTitle())
-                        .append(" - S")
-                        .append(video.getParentIndex())
-                        .append("E").append(video.getIndex())
-                        .toString();
+            if (DateUtils.isTodayOrYesterday(date)) {
+                if (video.getType().equals("episode")) {
+                    String episode = new StringBuilder(video.getGrandparentTitle())
+                            .append(" - S")
+                            .append(video.getParentIndex())
+                            .append("E").append(video.getIndex())
+                            .toString();
 
-                markEpisodeAsWatched(episode);
+                    markEpisodeAsWatched(episode);
+                } else {
+                    continue;
+                }
             } else {
-                System.exit(0);
+                break;
             }
         }
     }

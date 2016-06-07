@@ -19,6 +19,7 @@
 package org.nuvola.tvshowtime.util;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.TimeZone;
 
@@ -31,5 +32,9 @@ public class DateUtils {
         }
 
         return ofInstant(Instant.ofEpochSecond(timestamp), TimeZone.getDefault().toZoneId());
+    }
+
+    public static Boolean isTodayOrYesterday(LocalDateTime date) {
+        return date.toLocalDate().equals(LocalDate.now()) || date.toLocalDate().equals(LocalDate.now().minusDays(1));
     }
 }
