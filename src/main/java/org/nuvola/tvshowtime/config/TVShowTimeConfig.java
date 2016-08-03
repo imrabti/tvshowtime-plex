@@ -18,5 +18,19 @@
 
 package org.nuvola.tvshowtime.config;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+@Component
+@ConfigurationProperties(prefix = "nuvola.tvshowtime")
 public class TVShowTimeConfig {
+    private String tokenFile;
+
+    public String getTokenFile() {
+        return tokenFile;
+    }
+
+    public void setTokenFile(String tokenFile) {
+        this.tokenFile = tokenFile;
+    }
 }
