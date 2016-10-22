@@ -32,10 +32,12 @@ import org.nuvola.tvshowtime.business.plex.Video;
 import org.nuvola.tvshowtime.business.tvshowtime.AccessToken;
 import org.nuvola.tvshowtime.business.tvshowtime.AuthorizationCode;
 import org.nuvola.tvshowtime.business.tvshowtime.Message;
+import org.nuvola.tvshowtime.config.PMSConfig;
+import org.nuvola.tvshowtime.config.TVShowTimeConfig;
 import org.nuvola.tvshowtime.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpEntity;
@@ -62,12 +64,10 @@ import static org.springframework.http.HttpMethod.POST;
 public class ApplicationLauncher {
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationLauncher.class);
 
-    @Value("${nuvola.tvshowtime.tokenFile}")
-    private String tokenFile;
-    @Value("${nuvola.pms.path}")
-    private String pmsHost;
-    @Value("${nuvola.pms.token}")
-    private String pmsToken;
+    @Autowired
+    private TVShowTimeConfig tvShowTimeConfig;
+    @Autowired
+    private PMSConfig pmsConfig;
 
     private RestTemplate tvShowTimeTemplate;
     private RestTemplate pmsTemplate;
@@ -82,7 +82,7 @@ public class ApplicationLauncher {
 	public void init() {
         tvShowTimeTemplate = new RestTemplate();
 
-        File storeToken = new File(tokenFile);
+        File storeToken = new File(tvShowTimeConfig.getTokenFile());
         if (storeToken.exists()) {
             try {
                 FileInputStream fileInputStream = new FileInputStream(storeToken);
@@ -186,7 +186,7 @@ public class ApplicationLauncher {
 
     private void storeAccessToken() {
         try {
-            File storeToken = new File(tokenFile);
+            File storeToken = new File(tvShowTimeConfig.getTokenFile());
             FileOutputStream fileOutputStream = new FileOutputStream(storeToken);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
             objectOutputStream.writeObject(accessToken);
@@ -204,10 +204,10 @@ public class ApplicationLauncher {
 
     private void processWatchedEpisodes() {
         pmsTemplate = new RestTemplate();
-        String watchHistoryUrl = pmsHost + PMS_WATCH_HISTORY;
+        String watchHistoryUrl = pmsConfig.getPath() + PMS_WATCH_HISTORY;
 
-        if (pmsToken != null && !pmsToken.isEmpty()) {
-            watchHistoryUrl += "?X-Plex-Token=" + pmsToken;
+        if (pmsConfig.getToken() != null && !pmsConfig.getToken().isEmpty()) {
+            watchHistoryUrl += "?X-Plex-Token=" + pmsConfig.getToken();
             LOG.info("Calling Plex with a X-Plex-Token...");
         }
 
