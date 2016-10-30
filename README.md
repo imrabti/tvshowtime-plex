@@ -31,7 +31,7 @@ After downloading the application and extracting the archive in the folder you w
 There are two importants properties that needs to be configured correctly are : 
 
 1. **nuvola.pms.path** this is the HTTP URL of your Plex Media Server, if you are going to run this application on the same server as PMS then the default provided value is good (no need to change it), if it is not the case then you need to put the correct URL for _example nuvola.pms.path = http://192.168.1.5:32400_
-2. **nuvola.pms.token** starting from Plex media server 1.1 a **token**, all web services calls are secured and need to be done with the **X-Plex-Token**, to find out the Plex Token for the user you want to configure with **tvshowtime-plex** this article will explain to you how : http://bit.ly/1PqlB1v
+2. **nuvola.pms.token** starting from Plex media server 1.1 a **token** is required, all web services calls are secured and need to be done with the **X-Plex-Token**, to find out the Plex Token for the user you want to configure with **tvshowtime-plex** this article will explain to you how : http://bit.ly/1PqlB1v
 3. **nuvola.tvshowtime.tokenFile** this is the complete file path where you want your OAuth authorisation token to be stored, if you want the token to be stored in the folder where the application is then you are good with the default value. It is used so that you dont always have to go through all frustrating steps of configuring you TVShowTime account with this application.
 
 ```
@@ -40,9 +40,7 @@ There are two importants properties that needs to be configured correctly are :
 # where the PMS is installed
 nuvola.pms.path = http://localhost:32400
 
-# OPTIONAL when there is only one single Plex user
-# REQUIRED when there is multiple Plex users. When you have multiple users in Plex, PMS secure all
-# web services. In this case 'X-Plex-Token' of the user you want to use is important to communicate with PMS
+# REQUIRED: starting from Plex media server 1.1 a **token** is required, PMS secure all web services calls.
 # To find the 'X-Plex-Token' follow this article : http://bit.ly/1PqlB1v
 nuvola.pms.token =
 
