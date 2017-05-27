@@ -222,7 +222,10 @@ public class ApplicationLauncher {
 
             // Mark as watched only episodes for configured user
             if (pmsConfig.getUsername() != null && video.getUser() != null) {
-                List<User> users = video.getUser().stream().filter(user -> user.getName().equals(pmsConfig.getUsername())).collect(Collectors.toList());
+                List<User> users = video.getUser()
+                        .stream()
+                        .filter(user -> user.getName().equalsIgnoreCase(pmsConfig.getUsername()))
+                        .collect(Collectors.toList());
 
                 if (users.stream().count() == 0) {
                     continue;
