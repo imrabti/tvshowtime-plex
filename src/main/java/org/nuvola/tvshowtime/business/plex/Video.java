@@ -19,7 +19,10 @@
 package org.nuvola.tvshowtime.business.plex;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
 @XmlRootElement(name = "Video")
 public class Video {
@@ -28,6 +31,7 @@ public class Video {
     private Integer index;
     private Long viewedAt;
     private String type;
+    private List<User> user;
 
     @XmlAttribute(name="grandparentTitle")
     public String getGrandparentTitle() {
@@ -72,5 +76,14 @@ public class Video {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    @XmlElement(name = "User")
+    public List<User> getUser() {
+        return user;
+    }
+
+    public void setUser(List<User> user) {
+        this.user = user;
     }
 }

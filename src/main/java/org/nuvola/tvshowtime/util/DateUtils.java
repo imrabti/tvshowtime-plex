@@ -34,7 +34,11 @@ public class DateUtils {
         return ofInstant(Instant.ofEpochSecond(timestamp), TimeZone.getDefault().toZoneId());
     }
 
+    public static LocalDateTime getDateTime() {
+        return ofInstant(Instant.now(), TimeZone.getDefault().toZoneId());
+    }
+
     public static Boolean isTodayOrYesterday(LocalDateTime date) {
-        return date.toLocalDate().equals(LocalDate.now()) || date.toLocalDate().equals(LocalDate.now().minusDays(1));
+        return date.toLocalDate().equals(getDateTime().toLocalDate()) || date.toLocalDate().equals(getDateTime().toLocalDate().minusDays(1));
     }
 }
