@@ -19,10 +19,7 @@
 package org.nuvola.tvshowtime.business.plex;
 
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.List;
 
 @XmlRootElement(name = "Video")
 public class Video {
@@ -31,9 +28,10 @@ public class Video {
     private Integer index;
     private Long viewedAt;
     private String type;
-    private List<User> user;
+    private String title;
 
-    @XmlAttribute(name="grandparentTitle")
+
+    @XmlAttribute(name = "grandparentTitle")
     public String getGrandparentTitle() {
         return grandparentTitle;
     }
@@ -42,7 +40,7 @@ public class Video {
         this.grandparentTitle = grandparentTitle;
     }
 
-    @XmlAttribute(name="parentIndex")
+    @XmlAttribute(name = "parentIndex")
     public Integer getParentIndex() {
         return parentIndex;
     }
@@ -51,7 +49,7 @@ public class Video {
         this.parentIndex = parentIndex;
     }
 
-    @XmlAttribute(name="index")
+    @XmlAttribute(name = "index")
     public Integer getIndex() {
         return index;
     }
@@ -60,7 +58,7 @@ public class Video {
         this.index = index;
     }
 
-    @XmlAttribute(name="viewedAt")
+    @XmlAttribute(name = "viewedAt")
     public Long getViewedAt() {
         return viewedAt;
     }
@@ -69,7 +67,7 @@ public class Video {
         this.viewedAt = viewedAt;
     }
 
-    @XmlAttribute(name="type")
+    @XmlAttribute(name = "type")
     public String getType() {
         return type;
     }
@@ -78,12 +76,23 @@ public class Video {
         this.type = type;
     }
 
-    @XmlElement(name = "User")
-    public List<User> getUser() {
-        return user;
+    @XmlAttribute(name = "title")
+    public String getTitle() {
+        return title;
     }
 
-    public void setUser(List<User> user) {
-        this.user = user;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    @Override
+    public String toString() {
+        return "Video={" +
+                "grandparentTitle=" + grandparentTitle +
+                ", parentIndex=" + parentIndex +
+                ", index=" + index +
+                ", viewedAt=" + viewedAt +
+                ", type=" + type +
+                ", title=" + title + "}";
     }
 }

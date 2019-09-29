@@ -24,13 +24,10 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.stream.Collectors;
 
 import org.nuvola.tvshowtime.business.plex.MediaContainer;
-import org.nuvola.tvshowtime.business.plex.User;
 import org.nuvola.tvshowtime.business.plex.Video;
 import org.nuvola.tvshowtime.business.tvshowtime.AccessToken;
 import org.nuvola.tvshowtime.business.tvshowtime.AuthorizationCode;
@@ -220,14 +217,7 @@ public class ApplicationLauncher {
         for (Video video : mediaContainer.getVideo()) {
             LocalDateTime date = DateUtils.getDateTimeFromTimestamp(video.getViewedAt());
 
-            // Mark as watched only episodes for configured user
-            if (pmsConfig.getUsername() != null && video.getUser() != null) {
-                List<User> users = video.getUser().stream().filter(user -> user.getName().equals(pmsConfig.getUsername())).collect(Collectors.toList());
-
-                if (users.stream().count() == 0) {
-                    continue;
-                }
-            }
+            LOG.trace(video.toString());
 
             // Mark as watched only today and yesterday episodes
             if (DateUtils.isTodayOrYesterday(date) || pmsConfig.getMarkall() == true) {
@@ -239,14 +229,13 @@ public class ApplicationLauncher {
                             .toString();
 
                     markEpisodeAsWatched(episode);
-                } else {
-                    continue;
+                } else if (video.getType().equals("movie")) {
+                    //markEpisodeAsWatched(video.getTitle());
                 }
-            } else {
-                LOG.info("All episodes are processed successfully ...");
-                System.exit(0);
             }
         }
+        LOG.info("All episodes are processed successfully ...");
+        System.exit(0);
     }
 
     private void markEpisodeAsWatched(String episode) {
