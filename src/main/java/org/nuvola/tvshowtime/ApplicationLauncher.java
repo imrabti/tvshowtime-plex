@@ -18,20 +18,9 @@
 
 package org.nuvola.tvshowtime;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.time.LocalDateTime;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import org.nuvola.tvshowtime.business.plex.MediaContainer;
-import org.nuvola.tvshowtime.business.plex.Video;
-import org.nuvola.tvshowtime.business.tvshowtime.AccessToken;
-import org.nuvola.tvshowtime.business.tvshowtime.AuthorizationCode;
-import org.nuvola.tvshowtime.business.tvshowtime.Message;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.nuvola.tvshowtime.business.plex.*;
+import org.nuvola.tvshowtime.business.tvshowtime.*;
 import org.nuvola.tvshowtime.config.PMSConfig;
 import org.nuvola.tvshowtime.config.TVShowTimeConfig;
 import org.nuvola.tvshowtime.util.DateUtils;
@@ -40,23 +29,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.client.RestTemplate;
 
-import static org.nuvola.tvshowtime.util.Constants.MINUTE_IN_MILIS;
-import static org.nuvola.tvshowtime.util.Constants.PMS_WATCH_HISTORY;
-import static org.nuvola.tvshowtime.util.Constants.TVST_ACCESS_TOKEN_URI;
-import static org.nuvola.tvshowtime.util.Constants.TVST_AUTHORIZE_URI;
-import static org.nuvola.tvshowtime.util.Constants.TVST_CHECKIN_URI;
-import static org.nuvola.tvshowtime.util.Constants.TVST_CLIENT_ID;
-import static org.nuvola.tvshowtime.util.Constants.TVST_CLIENT_SECRET;
-import static org.nuvola.tvshowtime.util.Constants.TVST_RATE_REMAINING_HEADER;
-import static org.nuvola.tvshowtime.util.Constants.TVST_USER_AGENT;
+import java.io.*;
+import java.time.LocalDateTime;
+import java.util.*;
+
+import static org.nuvola.tvshowtime.util.Constants.*;
 import static org.springframework.http.HttpMethod.POST;
 
 @SpringBootApplication
@@ -69,17 +51,21 @@ public class ApplicationLauncher {
     @Autowired
     private PMSConfig pmsConfig;
 
+    private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     private RestTemplate tvShowTimeTemplate;
     private RestTemplate pmsTemplate;
     private AccessToken accessToken;
     private Timer tokenTimer;
+    private String m_url;
+    private Map<String, Long> m_users = new HashMap<>();
 
-	public static void main(String[] args) {
-		SpringApplication.run(ApplicationLauncher.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ApplicationLauncher.class, args);
+    }
 
     @Scheduled(fixedDelay = Long.MAX_VALUE)
-	public void init() {
+    public void init() {
         tvShowTimeTemplate = new RestTemplate();
 
         File storeToken = new File(tvShowTimeConfig.getTokenFile());
@@ -92,7 +78,8 @@ public class ApplicationLauncher {
                 fileInputStream.close();
 
                 LOG.info("AccessToken loaded from file with success : " + accessToken);
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 LOG.error("Error parsing the AccessToken stored in 'session_token'.");
                 LOG.error("Please remove the 'session_token' file, and try again.");
                 LOG.error(e.getMessage());
@@ -101,14 +88,17 @@ public class ApplicationLauncher {
             }
 
             try {
+                getUsersInPlex();
                 processWatchedEpisodes();
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 LOG.error("Error during marking episodes as watched.");
-                LOG.error(e.getMessage());
+                LOG.error("Error: ", e);
 
                 System.exit(1);
             }
-        } else {
+        }
+        else {
             requestAccessToken();
         }
     }
@@ -134,15 +124,22 @@ public class ApplicationLauncher {
                 tokenTimer.scheduleAtFixedRate(new TimerTask() {
                     @Override
                     public void run() {
-                        loadAccessToken(authorizationCode.getDevice_code());
+                        try {
+                            loadAccessToken(authorizationCode.getDevice_code());
+                        }
+                        catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }, 1000 * authorizationCode.getInterval(), 1000 * authorizationCode.getInterval());
-            } else {
+            }
+            else {
                 LOG.error("OAuth authentication TVShowTime failed.");
 
                 System.exit(1);
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             LOG.error("OAuth authentication TVShowTime failed.");
             LOG.error(e.getMessage());
 
@@ -150,7 +147,7 @@ public class ApplicationLauncher {
         }
     }
 
-    private void loadAccessToken(String deviceCode) {
+    private void loadAccessToken(String deviceCode) throws IOException {
         String query = new StringBuilder("client_id=")
                 .append(TVST_CLIENT_ID)
                 .append("&client_secret=")
@@ -173,7 +170,8 @@ public class ApplicationLauncher {
 
             storeAccessToken();
             processWatchedEpisodes();
-        } else {
+        }
+        else {
             if (!accessToken.getMessage().equals("Authorization pending")
                     && !accessToken.getMessage().equals("Slow down")) {
                 LOG.error("Unexpected error did arrive, please reload the service :-(");
@@ -194,7 +192,8 @@ public class ApplicationLauncher {
             fileOutputStream.close();
 
             LOG.info("AccessToken store successfully inside a file...");
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             LOG.error("Unexpected error did arrive when trying to store the AccessToken in a file ");
             LOG.error(e.getMessage());
 
@@ -202,34 +201,51 @@ public class ApplicationLauncher {
         }
     }
 
-    private void processWatchedEpisodes() {
+    private void getUsersInPlex() throws IOException {
         pmsTemplate = new RestTemplate();
-        String watchHistoryUrl = pmsConfig.getPath() + PMS_WATCH_HISTORY;
+        m_url = pmsConfig.getPath() + PMS_GET_ACCOUNTS;
+        appendPlexToken();
+        LOG.debug("Get users from plex with url: " + m_url);
+        String response = pmsTemplate.getForObject(m_url, String.class);
+        PlexResponse plexResponse = OBJECT_MAPPER.readValue(response, PlexResponse.class);
+        plexResponse.getMediaContainer().getAccount().stream().filter(user -> !user.getName().equals("")).forEach(user -> m_users.put(user.getName(), user.getId()));
+    }
 
-        if (pmsConfig.getToken() != null && !pmsConfig.getToken().isEmpty()) {
-            watchHistoryUrl += "?X-Plex-Token=" + pmsConfig.getToken();
-            LOG.info("Calling Plex with a X-Plex-Token...");
-        }
+    private void processWatchedEpisodes() throws IOException {
+        pmsTemplate = new RestTemplate();
+        m_url = pmsConfig.getPath() + PMS_WATCH_HISTORY;
 
-        ResponseEntity<MediaContainer> response =  pmsTemplate.getForEntity(watchHistoryUrl, MediaContainer.class);
-        MediaContainer mediaContainer = response.getBody();
+        appendPlexToken();
+        String response = pmsTemplate.getForObject(m_url, String.class);
 
-        for (Video video : mediaContainer.getVideo()) {
-            LocalDateTime date = DateUtils.getDateTimeFromTimestamp(video.getViewedAt());
+        PlexResponse plexResponse = OBJECT_MAPPER.readValue(response, PlexResponse.class);
+        LOG.debug(plexResponse.getMediaContainer().toString());
 
-            LOG.trace(video.toString());
+        for (MetaData metaData : plexResponse.getMediaContainer().getMetaData()) {
+            LocalDateTime date = DateUtils.getDateTimeFromTimestamp(metaData.getViewedAt());
+
+            LOG.info(metaData.toString());
+
+            // If present, mark as watched only episodes for configured user
+            if (pmsConfig.getUsername() != null) {
+                if (!metaData.getAccountID().equals(m_users.get(pmsConfig.getUsername()))) {
+                    continue;
+                }
+            }
 
             // Mark as watched only today and yesterday episodes
-            if (DateUtils.isTodayOrYesterday(date) || pmsConfig.getMarkall() == true) {
-                if (video.getType().equals("episode")) {
-                    String episode = new StringBuilder(video.getGrandparentTitle())
+            assert date != null;
+            if (DateUtils.isTodayOrYesterday(date) || pmsConfig.getMarkall()) {
+                if (metaData.getType().equals("episode")) {
+                    String episode = new StringBuilder(metaData.getGrandparentTitle())
                             .append(" - S")
-                            .append(video.getParentIndex())
-                            .append("E").append(video.getIndex())
+                            .append(metaData.getParentIndex())
+                            .append("E").append(metaData.getIndex())
                             .toString();
 
                     markEpisodeAsWatched(episode);
-                } else if (video.getType().equals("movie")) {
+                }
+                else if (metaData.getType().equals("movie")) {
                     //markEpisodeAsWatched(video.getTitle());
                 }
             }
@@ -254,7 +270,8 @@ public class ApplicationLauncher {
 
         if (message.getResult().equals("OK")) {
             LOG.info("Mark " + episode + " as watched in TVShowTime");
-        } else {
+        }
+        else {
             LOG.error("Error while marking [" + episode + "] as watched in TVShowTime ");
         }
 
@@ -264,11 +281,20 @@ public class ApplicationLauncher {
             try {
                 LOG.info("Consumed all available TVShowTime API calls slots, waiting for new slots ...");
                 Thread.sleep(MINUTE_IN_MILIS);
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 LOG.error(e.getMessage());
 
                 System.exit(1);
             }
         }
     }
+
+    private void appendPlexToken() {
+        if (pmsConfig.getToken() != null && !pmsConfig.getToken().isEmpty()) {
+            m_url += "?X-Plex-Token=" + pmsConfig.getToken();
+            LOG.info("Calling Plex with a X-Plex-Token = " + pmsConfig.getToken());
+        }
+    }
+
 }

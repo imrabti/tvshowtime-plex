@@ -28,6 +28,7 @@ public class Constants {
     public static final String TVST_CHECKIN_URI = "https://api.tvtime.com/v1/checkin";
 
     public static final String PMS_WATCH_HISTORY = "/status/sessions/history/all";
+    public static final String PMS_GET_ACCOUNTS = "/accounts";
 
     public static final Long SECOND_IN_MILIS = 1000L;
     public static final Long MINUTE_IN_MILIS = SECOND_IN_MILIS * 60;
