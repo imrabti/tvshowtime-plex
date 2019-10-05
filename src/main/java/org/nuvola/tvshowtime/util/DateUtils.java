@@ -19,7 +19,6 @@
 package org.nuvola.tvshowtime.util;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.TimeZone;
 
@@ -28,13 +27,12 @@ import static java.time.LocalDateTime.ofInstant;
 public class DateUtils {
     public static LocalDateTime getDateTimeFromTimestamp(long timestamp) {
         if (timestamp == 0) {
-            return null;
+            timestamp = 1L;
         }
-
         return ofInstant(Instant.ofEpochSecond(timestamp), TimeZone.getDefault().toZoneId());
     }
 
-    public static LocalDateTime getDateTime() {
+    private static LocalDateTime getDateTime() {
         return ofInstant(Instant.now(), TimeZone.getDefault().toZoneId());
     }
 

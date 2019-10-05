@@ -1,0 +1,8 @@
+{
+  "result": "OK",
+  "device_code": "3PngU8jQ7TKUwE475tBH",
+  "user_code": "be0e-7ab3",
+  "verification_url": "https://fakerequest/activate",
+  "expires_in": 900,
+  "interval": 5
+}

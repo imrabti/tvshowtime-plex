@@ -1,0 +1,89 @@
+{
+  "MediaContainer": {
+    "size": 4,
+    "Metadata": [
+      {
+        "key": "/library/metadata/8",
+        "parentKey": "/library/metadata/2",
+        "grandparentKey": "/library/metadata/1",
+        "title": "Un peccato sbagliare",
+        "grandparentTitle": "Marvel's Agent Carter",
+        "type": "episode",
+        "thumb": "/library/metadata/8/thumb/-1",
+        "parentThumb": "/library/metadata/2/thumb/1568358370",
+        "grandparentThumb": "/library/metadata/1/thumb/1568358468",
+        "grandparentArt": "/library/metadata/1/art/1568358468",
+        "index": 6,
+        "parentIndex": 1,
+        "originallyAvailableAt": "2015-02-10",
+        "viewedAt": SYSDATE,
+        "accountID": 1,
+        "deviceID": 4
+      },
+      {
+        "key": "/library/metadata/9",
+        "parentKey": "/library/metadata/2",
+        "grandparentKey": "/library/metadata/1",
+        "title": "L'apparenza inganna",
+        "grandparentTitle": "Marvel's Agent Carter",
+        "type": "episode",
+        "thumb": "/library/metadata/9/thumb/-1",
+        "parentThumb": "/library/metadata/2/thumb/1568358370",
+        "grandparentThumb": "/library/metadata/1/thumb/1568358468",
+        "grandparentArt": "/library/metadata/1/art/1568358468",
+        "index": 7,
+        "parentIndex": 1,
+        "originallyAvailableAt": "2015-02-17",
+        "viewedAt": SYSDATE,
+        "accountID": 2,
+        "deviceID": 4
+      },
+      {
+        "key": "/library/metadata/10",
+        "parentKey": "/library/metadata/2",
+        "grandparentKey": "/library/metadata/1",
+        "title": "Commiato",
+        "grandparentTitle": "Marvel's Agent Carter",
+        "type": "episode",
+        "thumb": "/library/metadata/10/thumb/-1",
+        "parentThumb": "/library/metadata/2/thumb/1568358370",
+        "grandparentThumb": "/library/metadata/1/thumb/1568358468",
+        "grandparentArt": "/library/metadata/1/art/1568358468",
+        "index": 8,
+        "parentIndex": 1,
+        "originallyAvailableAt": "2015-02-24",
+        "viewedAt": SYSDATE,
+        "accountID": 1,
+        "deviceID": 4
+      },
+      {
+        "key": "/library/metadata/3",
+        "parentKey": "/library/metadata/2",
+        "grandparentKey": "/library/metadata/1",
+        "title": "Questa non è la fine",
+        "grandparentTitle": "Marvel's Agent Carter",
+        "type": "episode",
+        "thumb": "/library/metadata/3/thumb/-1",
+        "parentThumb": "/library/metadata/2/thumb/1568358370",
+        "grandparentThumb": "/library/metadata/1/thumb/1568358468",
+        "grandparentArt": "/library/metadata/1/art/1568358468",
+        "index": 1,
+        "parentIndex": 1,
+        "originallyAvailableAt": "2015-01-06",
+        "viewedAt": 1568462280,
+        "accountID": 1,
+        "deviceID": 9
+      },
+      {
+        "key": "/library/metadata/1349",
+        "title": "Un sacco bello",
+        "type": "movie",
+        "thumb": "/library/metadata/1349/thumb/-1",
+        "originallyAvailableAt": "1980-01-19",
+        "viewedAt": SYSDATE,
+        "accountID": 1,
+        "deviceID": 4
+      }
+    ]
+  }
+}

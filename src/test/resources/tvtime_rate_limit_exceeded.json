@@ -1,0 +1,5 @@
+{
+  "code": 403,
+  "result": "KO",
+  "message": "API rate limit exceeded."
+}
