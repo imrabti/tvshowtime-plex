@@ -23,12 +23,12 @@ public class Constants {
     public static final String TVST_CLIENT_SECRET = "ZHYcO8n8h6WbYuMDWVgXr7T571ZF_s1r1Rzu1-3B";
     public static final String TVST_USER_AGENT = "tvshowtime-plex";
     public static final String TVST_RATE_REMAINING_HEADER = "X-RateLimit-Remaining";
-    public static final String TVST_AUTHORIZE_URI = "https://api.tvshowtime.com/v1/oauth/device/code";
-    public static final String TVST_ACCESS_TOKEN_URI = "https://api.tvshowtime.com/v1/oauth/access_token";
-    public static final String TVST_CHECKIN_URI = "https://api.tvshowtime.com/v1/checkin";
+    public static final String TVST_RATE_RESET_HEADER = "X-RateLimit-Reset";
+    public static final String TVST_AUTHORIZE_URI = "https://api.tvtime.com/v1/oauth/device/code";
+    public static final String TVST_ACCESS_TOKEN_URI = "https://api.tvtime.com/v1/oauth/access_token";
+    public static final String TVST_CHECKIN_URI = "https://api.tvtime.com/v1/checkin";
 
     public static final String PMS_WATCH_HISTORY = "/status/sessions/history/all";
+    public static final String PMS_GET_ACCOUNTS = "/accounts";
 
-    public static final Long SECOND_IN_MILIS = 1000L;
-    public static final Long MINUTE_IN_MILIS = SECOND_IN_MILIS * 60;
 }

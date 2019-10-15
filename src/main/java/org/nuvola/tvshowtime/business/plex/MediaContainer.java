@@ -18,17 +18,22 @@
 
 package org.nuvola.tvshowtime.business.plex;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
 import java.util.List;
 
 @XmlRootElement(name = "MediaContainer")
 public class MediaContainer {
+    @JsonProperty("size")
     private Integer size;
-    private List<Video> video;
+    private String identifier;
+    @JsonProperty("Metadata")
+    private List<MetaData> metaData;
+    @JsonProperty("Account")
+    private List<Account> account = new ArrayList<>();
 
-    @XmlAttribute(name="size")
     public Integer getSize() {
         return size;
     }
@@ -37,12 +42,28 @@ public class MediaContainer {
         this.size = size;
     }
 
-    @XmlElement(name = "Video")
-    public List<Video> getVideo() {
-        return video;
+    public List<MetaData> getMetaData() {
+        return metaData;
     }
 
-    public void setVideo(List<Video> video) {
-        this.video = video;
+    public void setMetaData(List<MetaData> metaData) {
+        this.metaData = metaData;
     }
+
+    public List<Account> getAccount() {
+        return account;
+    }
+
+    public void setAccount(List<Account> account) {
+        this.account = account;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
 }

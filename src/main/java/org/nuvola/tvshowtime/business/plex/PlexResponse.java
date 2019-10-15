@@ -1,6 +1,6 @@
 /*
  * tvshowtimeplex
- * Copyright (C) 2017  Appulize - Maciej Swic
+ * Copyright (C) 2019  AScuderoni
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,29 +18,19 @@
 
 package org.nuvola.tvshowtime.business.plex;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@XmlRootElement(name = "User")
-public class User {
-    private Long id;
-    private String name;
+public class PlexResponse {
 
-    @XmlAttribute(name="id")
-    public Long getId() {
-        return id;
+    @JsonProperty("MediaContainer")
+    private MediaContainer m_mediaContainer;
+
+    public MediaContainer getMediaContainer() {
+        return m_mediaContainer;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setMediaContainer(MediaContainer mediaContainer) {
+        m_mediaContainer = mediaContainer;
     }
 
-    @XmlAttribute(name="title")
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 }

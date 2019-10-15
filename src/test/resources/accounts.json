@@ -1,0 +1,48 @@
+{
+  "MediaContainer": {
+    "size": 4,
+    "identifier": "com.plexapp.system.accounts",
+    "Account": [
+      {
+        "id": 0,
+        "key": "/accounts/0",
+        "name": "",
+        "defaultAudioLanguage": "en",
+        "autoSelectAudio": true,
+        "defaultSubtitleLanguage": "en",
+        "subtitleMode": 1,
+        "thumb": ""
+      },
+      {
+        "id": 1,
+        "key": "/accounts/1",
+        "name": "admin",
+        "defaultAudioLanguage": "en",
+        "autoSelectAudio": true,
+        "defaultSubtitleLanguage": "en",
+        "subtitleMode": 1,
+        "thumb": ""
+      },
+      {
+        "id": 2,
+        "key": "/accounts/2",
+        "name": "FirstUser",
+        "defaultAudioLanguage": "en",
+        "autoSelectAudio": true,
+        "defaultSubtitleLanguage": "en",
+        "subtitleMode": 1,
+        "thumb": ""
+      },
+      {
+        "id": 3,
+        "key": "/accounts/3",
+        "name": "SecondUser",
+        "defaultAudioLanguage": "en",
+        "autoSelectAudio": true,
+        "defaultSubtitleLanguage": "en",
+        "subtitleMode": 1,
+        "thumb": ""
+      }
+    ]
+  }
+}
